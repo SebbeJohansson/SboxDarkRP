@@ -7,6 +7,7 @@ using GameSystems;
 /// </summary>
 public sealed class MovementController : Component
 {
+	// this is our movement controller copied from walker cs
 	[Property] public CharacterController CharacterController { get; set; }
 	[Property] public Collider Collider { get; set; }
 	[Property] public float CrouchMoveSpeed { get; set; } = 64.0f;
