@@ -84,7 +84,13 @@ namespace GameSystems
 				{
 					userGroups.Add( UserGroups["user"] );
 				}
-				Players.Add( connection.Id, new NetworkPlayer( player, connection, userGroups ) );
+
+				NetworkPlayer networkPlayer = new NetworkPlayer( player, connection, userGroups );
+				
+				var playerComponent = player.Components.Get<Sandbox.GameSystems.Player.Player>();
+				Log.Info("PlayerComponent: " + playerComponent);
+				Players.Add( connection.Id, networkPlayer);
+				// playerComponent.NetworkPlayer = networkPlayer;
 				if ( Rpc.Caller.IsHost )
 				{
 					chat?.NewSystemMessage( $"{connection.DisplayName} has joined the game." );
@@ -144,19 +150,21 @@ namespace GameSystems
 			{
 				return player;
 			}
-			return null;
+			return default;
 		}
 
 		public NetworkPlayer GetPlayerByGameObjectId( Guid gameObjectId )
 		{
+			Log.Info("gameobject id in get player by gameobjectid :"+ gameObjectId);
 			foreach ( var player in Players )
 			{
+				Log.Info("player in loop :"+ player.Value.GameObject.Id + " " + player.Value.Connection.DisplayName);
 				if ( player.Value.GameObject.Id == gameObjectId )
 				{
 					return player.Value;
 				}
 			}
-			return null;
+			return default;
 		}
 
 		public NetworkPlayer GetPlayerByName( string name )
@@ -168,7 +176,7 @@ namespace GameSystems
 					return player.Value;
 				}
 			}
-			return null;
+			return default;
 		}
 		
 		public NetworkPlayer GetMe()
@@ -185,7 +193,7 @@ namespace GameSystems
 					return player.Value;
 				}
 			}
-			return null;
+			return default;
 		}
 
 		/// <summary>
@@ -213,7 +221,7 @@ namespace GameSystems
 		/// <returns></returns>
 		public NetworkPlayer PlayerLookup( string input )
 		{
-			NetworkPlayer foundNetworkPlayer = null;
+			NetworkPlayer foundNetworkPlayer = default;
 			// Find the player
 			// If args[0] can be parsed as ulong, then try to lookup with SteamID first
 			if ( ulong.TryParse( input, out var steamID ) )
@@ -222,7 +230,10 @@ namespace GameSystems
 			}
 
 			// If not found by SteamID, try to find by name
-			foundNetworkPlayer ??= GetPlayerByName( input );
+			if (foundNetworkPlayer.Equals(default(NetworkPlayer)))
+			{
+				foundNetworkPlayer = GetPlayerByName(input);
+			}
 
 			return foundNetworkPlayer;
 		}
@@ -231,7 +242,7 @@ namespace GameSystems
 		public void SelectJob(Guid ownerId, JobResource job )
 		{
 			var networkPlayer = GetPlayerByConnectionId( ownerId );
-			if ( networkPlayer != null )
+			if ( !networkPlayer.Equals(default(NetworkPlayer)) )
 			{
 				networkPlayer.Job = job;
 			}

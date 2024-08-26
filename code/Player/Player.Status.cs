@@ -16,6 +16,7 @@ namespace Sandbox.GameSystems.Player
 		// BASE PLAYER PROPERTYS
 
 		[Sync, HostSync][Property, Group("Status")] public float Balance { get; set; } = 500f;
+		[Sync, HostSync] public NetworkPlayer NetworkPlayer { get; set; }
 
 		[Property, Group("Status")] public float Health { get; private set; } = 100f;
 		[Property, Group("Status")]  public float Hunger { get; private set; } = 100f;
@@ -67,7 +68,7 @@ namespace Sandbox.GameSystems.Player
 			if ( lastSaved >= saveCooldown && (Networking.IsHost) )
 			{
 
-				if ( GetNetworkPlayer() != null )
+				if ( !GetNetworkPlayer().Equals(default(NetworkPlayer)) )
 				{
 					SavedPlayer.SavePlayer( new SavedPlayer( this.GetNetworkPlayer() ) );
 					lastSaved = 0; // reset the timer
@@ -103,6 +104,8 @@ namespace Sandbox.GameSystems.Player
 		/// <returns></returns>
 		public NetworkPlayer GetNetworkPlayer()
 		{
+			Log.Info("GameObject.Id: " + GameObject.Id);
+			// return NetworkPlayer;
 			return controller.GetPlayerByGameObjectId( GameObject.Id );
 		}
 		

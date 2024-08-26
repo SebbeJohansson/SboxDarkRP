@@ -29,7 +29,7 @@ namespace Entity.Interactable.Door
 		}
 		public override void InteractSpecial( SceneTraceResult tr, GameObject player )
 		{
-			if ( Owner == null )
+			if ( Owner.Equals(default(NetworkPlayer)) )
 			{
 				var playerStats = player.Components.Get<Player>();
 				playerStats.PurchaseDoor(Price ,this.Door);
@@ -46,25 +46,25 @@ namespace Entity.Interactable.Door
 		public override void InteractAttack1( SceneTraceResult tr, GameObject player )
 		{
 			// TODO The user should have a "keys" weapon select to do the following interactions to avoid input conflicts
-			if (player.Id == Owner?.GameObject.Id ) { LockDoor(); } else { KnockOnDoor(); }
+			if (player.Id == Owner.GameObject.Id ) { LockDoor(); } else { KnockOnDoor(); }
 		}
 
 		public override void InteractAttack2( SceneTraceResult tr, GameObject player )
 		{
 			// TODO The user should have a "keys" weapon select to do the following interactions to avoid input conflicts
-			if (player.Id == Owner?.GameObject.Id) { UnlockDoor(); } else { KnockOnDoor(); }
+			if (player.Id == Owner.GameObject.Id) { UnlockDoor(); } else { KnockOnDoor(); }
 		}
 
 		[Broadcast]
 		public void UpdateDoorOwner( GameObject player = null, Player playerStats = null )
 		{
-			Owner = player != null ? GameController.Instance.GetPlayerByGameObjectId( player.Id ) : null;
+			Owner = player != null ? GameController.Instance.GetPlayerByGameObjectId( player.Id ) : default;
 			OwnerStats = playerStats;
 		}
 
 		public void SellDoor() //This Function does no longer removes the Door in Player.Stats or checks if it's done
 		{
-			if ( Owner == null )
+			if ( Owner.Equals(default(NetworkPlayer)) )
 			{
 				return;
 			}

@@ -1,10 +1,11 @@
 @using global::Entity.Interactable.Door
 @using Sandbox;
+@using Sandbox.GameSystems.Player;
 @inherits PanelComponent
 
 
 <root class="root">
-  @if (DoorProperties != null && DoorProperties.Owner == null)
+  @if (DoorProperties != null && DoorProperties.Owner.Equals(default(NetworkPlayer)))
   {
     <div class="container">
       <div class="title">For Sale</div>

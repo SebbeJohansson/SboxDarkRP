@@ -2,6 +2,7 @@
 @using Sandbox.UI;
 @using System;
 @using Sandbox.GameSystems.Config;
+@using Sandbox.GameSystems.Player;
 @using global::GameSystems
 @inherits PanelComponent
 @implements Component.INetworkListener
@@ -18,7 +19,7 @@
                     <div class="about">
                         @if (entry.steamid > 0)
                         {
-                            var userGroup = GameController?.GetPlayerBySteamID(entry.steamid)?.GetHighestUserGroup();
+                            var userGroup = GameController?.GetPlayerBySteamID(entry.steamid).GetHighestUserGroup();
                             if (userGroup?.Color != null) {
                                 color = userGroup.Color;
                             }
@@ -254,7 +255,7 @@
             {
                 // Find the player executing the command
                 var player = GameController.GetPlayerByConnectionId( Rpc.Caller.Id );
-                if ( player == null ) return false;
+                if ( player.Equals(default(NetworkPlayer)) ) return false;
                 executeCommand(command, player.GameObject, args);
                 return true;
             }catch (Exception e)

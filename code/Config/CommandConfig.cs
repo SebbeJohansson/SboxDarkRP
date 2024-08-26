@@ -21,12 +21,13 @@ namespace GameSystems.Config
 						{
 							var playerStats = player.Components.Get<Sandbox.GameSystems.Player.Player>();
 							if (playerStats == null) return false;
+							Log.Info("Player stats set, so clearing.");
 							
 							// Get the chat
 							var chat = scene.Directory.FindByName("Screen")?.First()?.Components.Get<Chat>();
 							if (chat == null) return false;
-
-							using ( Rpc.FilterInclude( c => c.Id == playerStats.GetNetworkPlayer()?.Connection.Id) )
+							Log.Info("Chat is set, so clearing");
+							using ( Rpc.FilterInclude( c => c.Id == playerStats.GetNetworkPlayer().Connection.Id) )
 							{
 								chat.ClearChat();
 							}
@@ -78,7 +79,7 @@ namespace GameSystems.Config
 
 								var foundPlayer = GameController.PlayerLookup(args[0]);
 
-								if (foundPlayer == null)
+								if (foundPlayer.Equals(default(NetworkPlayer)))
 								{
 									playerStats.SendMessage($"Player {args[0]} not found");
 									return false;
@@ -120,7 +121,7 @@ namespace GameSystems.Config
 
 								var foundPlayer = GameController.PlayerLookup(args[0]);
 
-								if (foundPlayer == null)
+								if (foundPlayer.Equals(default(NetworkPlayer)))
 								{
 									playerStats.SendMessage($"Player {args[0]} not found");
 									return false;
@@ -155,7 +156,7 @@ namespace GameSystems.Config
 
 								var foundPlayer = GameController.PlayerLookup(args[0]);
 
-								if (foundPlayer == null)
+								if (foundPlayer.Equals(default(NetworkPlayer)))
 								{
 									playerStats.SendMessage($"Player {args[0]} not found");
 									return false;
@@ -170,7 +171,7 @@ namespace GameSystems.Config
 								}
 
 								// Check if the player has permission to set the rank
-								if ( playerStats.GetNetworkPlayer()?.CheckPermission(rank.PermissionLevel) == false )
+								if ( playerStats.GetNetworkPlayer().CheckPermission(rank.PermissionLevel) == false )
 								{
 									playerStats.SendMessage("You do not have permission to set this rank.");
 									return false;
@@ -198,7 +199,7 @@ namespace GameSystems.Config
 								if (args.Length > 0)
 								{
 									var foundPlayer = GameController.PlayerLookup(args[0]);
-									if ( foundPlayer is not null ) targetPlayer = foundPlayer.GameObject;
+									if ( !foundPlayer.Equals(default(NetworkPlayer)) ) targetPlayer = foundPlayer.GameObject;
 								}
 								
 
@@ -319,7 +320,7 @@ namespace GameSystems.Config
 
 								// Find the target player by username
 								var targetPlayer = gameController.PlayerLookup(args[0]);
-								if (targetPlayer == null)
+								if (targetPlayer.Equals(default(NetworkPlayer)))
 								{
 									playerStats.SendMessage($"Player {args[0]} not found.");
 									return false;
@@ -397,9 +398,12 @@ namespace GameSystems.Config
 		[Broadcast( NetPermission.HostOnly )]
 		public void ExecuteCommand(string commandName, GameObject player, Scene scene, string[] args)
 		{
+			Log.Info("Executing command on player: " + player.Name);
 			// Get the PlayerStats component. This is required for all players. Verifies the player is a player.
 			var playerStats = player.Components.Get<Sandbox.GameSystems.Player.Player>();
+			Log.Info(playerStats);
 			if ( playerStats == null ) return;
+			Log.Info("Got player stats" + playerStats.GetNetworkPlayer().Name);
 			try
 			{
 
@@ -413,12 +417,13 @@ namespace GameSystems.Config
 				}
 
 				// Get the player details
-				var details = playerStats.GetNetworkPlayer();
-				if ( details == null ) return;
+				var networkPlayer = playerStats.GetNetworkPlayer();
+				Log.Info("Got player details: " + networkPlayer.Name);
+				if ( networkPlayer.Equals(default(NetworkPlayer)) ) return;
 
 				var command = GetCommand( commandName );
 
-				if ( !details.CheckPermission(command.PermissionLevel) )
+				if ( !networkPlayer.CheckPermission(command.PermissionLevel) )
 				{
 					playerStats.SendMessage( "You do not have permission to execute this command." );
 					return;
